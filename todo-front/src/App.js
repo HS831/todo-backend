@@ -1,5 +1,3 @@
-// App.js
-
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -12,6 +10,10 @@ import {
   AppBar,
   Toolbar,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +22,9 @@ import axios from 'axios';
 const TodoApp = () => {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
+  const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
+  const [selectedTodoId, setSelectedTodoId] = useState('');
+  const [updatedTodoText, setUpdatedTodoText] = useState('');
 
   useEffect(() => {
     fetchTodos();
@@ -53,15 +58,24 @@ const TodoApp = () => {
     }
   };
 
-  const handleUpdateTodo = async (id) => {
-    const updatedText = prompt('Enter the updated todo text:', '');
-    if (updatedText !== null) {
-      try {
-        await axios.patch(`http://localhost:3001/todos/${id}`, { todo: updatedText });
-        fetchTodos();
-      } catch (error) {
-        console.error('Error updating todo:', error);
-      }
+  const handleUpdateTodo = (id) => {
+    setUpdateModalOpen(true);
+    setSelectedTodoId(id);
+  };
+
+  const handleModalClose = () => {
+    setUpdateModalOpen(false);
+    setSelectedTodoId('');
+    setUpdatedTodoText('');
+  };
+
+  const handleModalUpdate = async () => {
+    try {
+      await axios.patch(`http://localhost:3001/todos/${selectedTodoId}`, { todo: updatedTodoText });
+      fetchTodos();
+      handleModalClose();
+    } catch (error) {
+      console.error('Error updating todo:', error);
     }
   };
 
@@ -102,6 +116,28 @@ const TodoApp = () => {
           ))}
         </List>
       </Container>
+
+      {/* Update Todo Modal */}
+      <Dialog open={isUpdateModalOpen} onClose={handleModalClose}>
+        <DialogTitle>Update Todo</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Updated Todo"
+            value={updatedTodoText}
+            onChange={(e) => setUpdatedTodoText(e.target.value)}
+            variant="outlined"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModalClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleModalUpdate} color="primary">
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
