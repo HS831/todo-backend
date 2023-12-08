@@ -11,7 +11,7 @@ mongoose.connect(process.env.DATABASE_URI, {
 .then(() => console.log('Connected to DB...'))
 .catch(err => console.log('DB Error : ', err))
 
-const PORT = 3000
+const PORT = 3001
 
 app.listen(PORT, () => {
     console.log(`Backend server started at: ${PORT}`);
